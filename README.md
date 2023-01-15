@@ -6,9 +6,9 @@
 
 ![TMPS Generator](https://user-images.githubusercontent.com/81706331/212510877-8d9f0b71-1191-43bf-b86f-1970e8b71af8.png)
 
-## Built-in TPMS designs
-
 ---
+
+## Built-in TPMS designs
 
 The current library of **TPMS Generator** features a total of 10 distinct TPMS typologies, including 5 skeletal and 5 shell morphologies. These typologies provide users with a wide range of options for designing and exploring different TPMS geometries, and the ability to choose between skeletal and shell structures allows for even greater flexibility in their designs.
 
@@ -64,9 +64,9 @@ $\quad \cos(x) + \cos(y) + \cos(z) - C = 0$
 
 $\quad 2 \cdot \left[ \cos(x) \cdot \cos(y) + \cos(y) \cdot \cos(z) + \cos(z) \cdot \cos(x) \right] - \left[ \cos(2x) + \cos(2y) + \cos(2z) \right] - C = 0$
 
-## Prerequisites / Getting started
-
 ---
+
+## Prerequisites / Getting started
 
 - Operating Systems: Windows, MacOS, Linux
 - Hardware: 4GB of RAM or more
@@ -90,9 +90,9 @@ pip install -r requirements.txt
 
 Some of the operations that **TPMS Generator** employs to create the mesh of the desired TPMS designs also require that [Blender](https://www.blender.org/download/) sowftare is installed in your computer. You can follow the available [documentation](https://www.blender.org/support/) for troubleshooting during its installation.
 
-## Interface preview / Help
-
 ---
+
+## Interface preview / Help
 
 Let's take a closer look at the user interface of **TPMS Generator** through a series of screenshots. The following pictures will provide a visual representation of the program and the process to generate the mesh of the desired TPMS design and export it into .STL format. In particular, you will be able to see its layout, the different buttons and design parameters provided in the main menu, as well as the rest of the program's features.
 
@@ -122,8 +122,8 @@ In all cases, the result can be plotted and exported into .STL file format by cl
 
 ![Mesh](https://user-images.githubusercontent.com/81706331/212511172-339de4fe-e169-4aa8-9791-4215f01efe70.png)
 
-## Acknowledgements
-
 ---
+
+## Acknowledgements
 
 This work has been supported by the **Ministry of Science, Innovation and Universities** through the project **New Developments in Lightweight Composite Sandwich Panels with 3D Printed Cores (3DPC) - RTI2018-099754-A-I00**; and by the **RIS3CAT Llavor 3D Community** co-financed by the **Generalitat de Catalunya (ACCIÓ)** through the project **TRANSPORT COMRDI16-1-0010 - (2017-2020)**.
