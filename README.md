@@ -24,45 +24,46 @@ The current library of **TPMS Generator** features a total of 10 distinct TPMS t
 
 #### a) Gyroid:
 
-$\quad \sin(x) \cdot \cos(y) + \sin(y) \cdot \cos(z) + \sin(z) \cdot \cos(x) = 0$
+$\sin(x) \cdot \cos(y) + \sin(y) \cdot \cos(z) + \sin(z) \cdot \cos(x) = 0$
 
 #### b) Diamond
 
-$\quad \sin(x) \cdot \sin(y) \cdot \sin(z) + \sin(x) \cdot \cos(y) \cdot \cos(z) + \cos(x) \cdot \sin(y) \cdot \cos(z) + \cos(x) \cdot \cos(y) \cdot \sin(z) = 0$
+$\sin(x) \cdot \sin(y) \cdot \sin(z) + \sin(x) \cdot \cos(y) \cdot \cos(z) + \cos(x) \cdot \sin(y) \cdot \cos(z) + \cos(x) \cdot \cos(y) \cdot \sin(z) = 0$
 
 #### c) Lidinoid:
 
-$\quad \sin(2x) \cdot \cos(y) \cdot \sin(z) + \sin(x) \cdot \sin(2y) \cdot \cos(z) + \cos(x) \cdot \cos(y) \cdot \cos(2z) - \cos(2x) \cdot \cos(2y) - \cos(2y) \cdot \cos(2z) - \cos(2z) \cdot \cos(2x) + 0.3 = 0$
+$\sin(2x) \cdot \cos(y) \cdot \sin(z) + \sin(x) \cdot \sin(2y) \cdot \cos(z) + \cos(x) \cdot \sin(y) \cdot \sin(2z) - \cos(2x) \cdot \cos(2y) - \cos(2y) \cdot \cos(2z) - \cos(2z) \cdot \cos(2x) + 0.3 = 0$
 
 #### d) Split-P:
 
-$\quad 1.1 \cdot \left[ \sin(2x) \cdot \cos(y) \cdot \sin(z) + \sin(x) \cdot \sin(2y) \cdot \cos(z) + \cos(x) \cdot \sin(y) \cdot \sin(2z) \right] - 0.2 \cdot \left[ \cos(2x) \cdot \cos(2y) + \cos(2y) \cdot \cos(2z) + \cos(2z) \cdot \cos(2x) \right] - 0.4 \cdot \left[ \cos(2x) + \cos(2y) + \cos(2z) \right] = 0$
+$1.1 \cdot \left[ \sin(2x) \cdot \cos(y) \cdot \sin(z) + \sin(x) \cdot \sin(2y) \cdot \cos(z) + \cos(x) \cdot \sin(y) \cdot \sin(2z) \right] - 0.2 \cdot \left[ \cos(2x) \cdot \cos(2y) + \cos(2y) \cdot \cos(2z) + \cos(2z) \cdot \cos(2x) \right] - 0.4 \cdot \left[ \cos(2x) + \cos(2y) + \cos(2z) \right] = 0$
 
 #### e) Schwarz:
 
-$\quad \cos(x) + \cos(y) + \cos(z) = 0$
+$\cos(x) + \cos(y) + \cos(z) = 0$
+
 
 ### Equations of Skeletal-TPMS desgins:
 
 #### f) Schoen Gyroid:
 
-$\quad \sin(x) \cdot \cos(y) + \sin(y) \cdot \cos(z) + \sin(z) \cdot \cos(y) - C = 0$
+$\sin(x) \cdot \cos(y) + \sin(y) \cdot \cos(z) + \sin(z) \cdot \cos(x) - C = 0$
 
 #### g) Schwarz Diamond:
 
-$\quad \cos(x) \cdot \cos(y) \cdot \cos(z) + \sin(x) \cdot \sin(y) \cdot \sin(z) - C = 0$
+$\cos(x) \cdot \cos(y) \cdot \cos(z) + \sin(x) \cdot \sin(y) \cdot \sin(z) - C = 0$
 
 #### h) Schwarz Primitive (pinched):
 
-$\quad \cos(x) + \cos(y) + \cos(z) - C = 0$
+$\cos(x) + \cos(y) + \cos(z) - C = 0$
 
 #### i) Schwarz Primitive:
 
-$\quad \cos(x) + \cos(y) + \cos(z) - C = 0$
+$\cos(x) + \cos(y) + \cos(z) - C = 0$
 
 #### j) Body Diagonals with Nodes:
 
-$\quad 2 \cdot \left[ \cos(x) \cdot \cos(y) + \cos(y) \cdot \cos(z) + \cos(z) \cdot \cos(x) \right] - \left[ \cos(2x) + \cos(2y) + \cos(2z) \right] - C = 0$
+$2 \cdot \left[ \cos(x) \cdot \cos(y) + \cos(y) \cdot \cos(z) + \cos(z) \cdot \cos(x) \right] - \left[ \cos(2x) + \cos(2y) + \cos(2z) \right] - C = 0$
 
 ---
 
