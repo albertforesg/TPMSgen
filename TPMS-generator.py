@@ -1,20 +1,23 @@
 import os
 import sys
 import trimesh
+import utils
 
 import numpy as np
 import pyvista as pv
 
-from PyQt5 import uic
-from PyQt5.QtCore import QFileInfo
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QDesktopWidget, QFileDialog
+import PySide2.QtUiTools
+import PySide2.QtCore
+from PySide2.QtWidgets import QMainWindow, QApplication, QMessageBox, QDesktopWidget, QFileDialog
+
 from skimage import measure
+
 
 # GUI menu functions:
 class gui_menu(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        uic.loadUi('tpms_generator_gui.ui', self)
+    def __init__(self, parent=None):
+        QMainWindow.__init__(self, parent)
+        utils.loadUi('tpms_generator_gui.ui', self)
 
         # Initialize variables:
         self.initialize_variables()
