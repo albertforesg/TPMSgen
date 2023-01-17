@@ -1,2 +1,8 @@
-.DS_Store
+# Directories
+*pycache*
+dist/
+build/
 Other\ Files/
+
+# Files
+.DS_Store
