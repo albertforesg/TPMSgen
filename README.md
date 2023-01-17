@@ -161,22 +161,28 @@ In all cases, the result can be plotted and exported into **.STL** file format b
 
 To correctly cite the application it is necessary to refer to the Github repository and the paper.
 
+A. Forés-Garriga, G. Gómez-Gras, and M. A. Pérez. Mechanical performance of additively manufactured three-dimensional lightweight cellular solids: experimental and numerical analysis, Materials & Design (2023) - Under review
+
+```bibtex
+@article{fores_2023,
+	title = {Mechanical performance of additively manufactured three-dimensional lightweight cellular solids: experimental and numerical analysis.},
+	doi = {},
+	author = {A. For{\'{e}}s-Garriga, G. G{\'{o}}mez-Gras}, P{\'{e}}rez, Marco A.,
+	journal = {Materials & Design},
+	year = {2023},
+	note = { (Under review) }
+}
+```
+
+A. Forés-Garriga, H. García de la Torre, R. Lado-Roigé, G. Gómez-Gras, and M. A. Pérez. Triply Periodic Minimal Surfaces Generator - TPMSgen, 2023. URL: [TPMSgen](https://github.com/albertforesg/TPMSgen).
+
 ```bibtex
 @software{TPMSgen,
 	author = {{A. For{\'{e}}s-Garriga, H. Garc{\'{i}}a de la Torre, R. Lado-Roig{\'{e}}, G. G{\'{o}}mez- Gras, and M. A. P{\'{e}}rez.}},
-	title = {TPMSgen},
+	title = {Triply Periodic Minimal Surfaces Generator - TPMSgen},
 	url = {https://github.com/albertforesg/TPMSgen},
-	version = {},
-	date = {2023-01-15},
-}
-
-@article{fores_2023,
-  title={Mechanical performance of additively manufactured three-dimensional lightweight cellular solids: experimental and numerical analysis.},
-  doi = {},
-  author={A. For{\'{e}}s-Garriga, P{\'{e}}rez, Marco A., G. G{\'{o}}mez-Gras},
-  journal={Materials & Design},
-  year={2023},
-  note = { (Under review) }
+	version = {1.0},
+	year = {2023},
 }
 ```
 ---
