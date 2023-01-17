@@ -174,7 +174,7 @@ A. Forés-Garriga, G. Gómez-Gras, and M. A. Pérez. Mechanical performance of a
 }
 ```
 
-A. Forés-Garriga, H. García de la Torre, R. Lado-Roigé, G. Gómez-Gras, and M. A. Pérez. Triply Periodic Minimal Surfaces Generator - TPMSgen, 2023. URL: [TPMSgen](https://github.com/albertforesg/TPMSgen).
+A. Forés-Garriga, H. García de la Torre, R. Lado-Roigé, G. Gómez-Gras, and M. A. Pérez. Triply Periodic Minimal Surfaces Generator - TPMSgen, 2023. URL: [https://github.com/albertforesg/TPMSgen](https://github.com/albertforesg/TPMSgen).
 
 ```bibtex
 @software{TPMSgen,
