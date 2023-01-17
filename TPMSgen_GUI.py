@@ -149,6 +149,7 @@ class gui_menu(QMainWindow):
     def fn_flip_face_normals(self):
         # Flip face normals
         self.mesh = core.fn_flip_face_normals(self.mesh, True)
+        self.flip_face_normals = True
 
         # Update output message:
         self.message_output_label.setText('Next step:')
@@ -300,27 +301,18 @@ class gui_menu(QMainWindow):
         self.are_warnings = None
         self.c = None
         self.cell_sizes = None
-        self.faces = None
         self.flip_face_normals = False
-        self.is_watertight = None
         self.iterative_mesh = None
         self.mesh = None
         self.origin = None
-        self.shell_bounding_box = None
         self.sizes = None
-        self.skeletal_bounding_box = None
-        self.spacing = None
         self.t = None
         self.thickness = None
-        self.tols = None
         self.tpms_library_items = None
         self.tpms_type = None
         self.tpms_design = None
         self.unit_cell_mesh_resolution = None
         self.vertices = None
-        self.X = None
-        self.Y = None
-        self.Z = None
 
     def load_default_values(self):
         # Initialize Skeletal-TPMS designs library:
