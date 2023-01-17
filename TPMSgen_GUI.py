@@ -1,3 +1,5 @@
+from src import core
+
 import os
 import sys
 import trimesh
@@ -7,13 +9,14 @@ import pyvista as pv
 
 from PyQt5 import uic
 from PyQt5.QtCore import QFileInfo
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QDesktopWidget, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QDesktopWidget, QFileDialog, QSizeGrip
 from skimage import measure
 
 # GUI menu functions:
 class gui_menu(QMainWindow):
     def __init__(self):
         super().__init__()
+
         uic.loadUi('TPMSgen_GUI.ui', self)
 
         # Initialize variables:
@@ -81,8 +84,8 @@ class gui_menu(QMainWindow):
             self.c = 0
             self.shell_thickness_input.setEnabled(True)
             if tpms_type_changed:
-                self.shell_thickness_input.setText('1')
-                self.thickness = 1
+                self.shell_thickness_input.setText('3')
+                self.thickness = 3
 
         if self.tpms_type == 'Skeletal':
             self.skeletal_c_input.setEnabled(True)
@@ -109,68 +112,34 @@ class gui_menu(QMainWindow):
             self.cell_sizes = [float(self.unit_cell_x_dim_input.text()), float(self.unit_cell_y_dim_input.text()), float(self.unit_cell_z_dim_input.text())]
             self.origin = [float(self.unit_cell_origin_x_input.text()), float(self.unit_cell_origin_y_input.text()), float(self.unit_cell_origin_z_input.text())]
             self.unit_cell_mesh_resolution = int(self.mesh_resolution_input.text())
-            self.tols = [0, 0, 0]
-            self.X, self.Y, self.Z, self.tols, self.spacing  = self.generate_meshgrid(0)
 
-            # Generate TPMS:
+            # Get C value or thickness:
             if self.tpms_type == 'Shell':
                 self.c = 0
                 self.thickness = float(self.shell_thickness_input.text())
             else:
                 self.c = float(self.skeletal_c_input.text())
                 self.thickness = None
-            self.F = self.tpms_library(self.X, self.Y, self.Z)
-
-            # Mesh TPMS:
-            if self.tpms_type == 'Shell':
-                self.mesh, self.vertices = self.mesh_shell(self.F, self.mesh, self.tols, self.spacing)
-            else:
-                self.mesh, self.vertices = self.mesh_skeletal(self.F, self.mesh, self.tols, self.spacing)
-
-            # Colour TPMS vertices:
-            color = []
-            for vert in self.vertices:
-                color.append(vert[0] * vert[1] * vert[2])
-            color = np.array(color)
 
             # Update output message:
             self.message_output_label.setText('Next step:')
             self.message_output_label.setStyleSheet('color : black')
             self.message_output.setText('Inspect the generated TPMS\ndesign and check the orientation\nof its face normals.')
-
-            # Plot TPMS vertices:
-            self.plotter = pv.Plotter(window_size = [1400, 1600])
-            _ = self.plotter.add_title('Close this window to continue', font_size = 10)
-            _ = self.plotter.add_mesh(self.vertices, scalars = color, cmap = 'jet')
-            _ = self.plotter.remove_scalar_bar()
-            _ = self.plotter.show_grid()
-            self.plotter.show()
             
+            # Plot TPMS equation:
+            self.mesh, self.vertices = core.fn_plot_tpms_eq(self.tpms_type, self.tpms_design, self.sizes, self.cell_sizes, self.origin, self.unit_cell_mesh_resolution, self.c, self.thickness, self.mesh)
+
             # Activate check normals button:
             self.change_visibility(self.check_normals_button, True)
 
     def fn_check_face_normals(self):
-        # Calculate face centroids and normals:
-        mesh_pv = pv.wrap(self.mesh)
-        cent = mesh_pv.cell_centers().points
-        direction = mesh_pv.cell_normals
-
         # Update output message:
         self.message_output_label.setText('Next step:')
         self.message_output_label.setStyleSheet('color : black')
-        if self.tpms_type == 'Shell':
-            self.message_output.setText('Check if face normals are\npointing OUT of the mesh. If not,\nplease flip them. Then proceeed\nto generate mesh.')
-        else:
-            self.message_output.setText('Check if face normals are\npointing OUT to the mesh. If not,\nplease flip them. Then proceeed\nto generate mesh.')
+        self.message_output.setText('Check if face normals are\npointing OUT of the mesh. If not,\nplease flip them. Then proceeed\nto generate mesh.')
 
-        # Plot TPMS face normals:
-        self.plotter = pv.Plotter(window_size = [1400, 1600])
-        _ = self.plotter.add_title('Close this window to continue', font_size = 10)
-        _ = self.plotter.add_mesh(self.mesh, color = True, show_edges = True)
-        _ = self.plotter.add_arrows(cent, direction, mag = 1)
-        _ = self.plotter.remove_scalar_bar()
-        _ = self.plotter.show_grid()
-        self.plotter.show()
+        # Check face normals:
+        self.mesh = core.fn_check_face_normals(self.mesh, True)
 
         # Activate check normals button:
         self.change_visibility(self.flip_normals_button, True)
@@ -179,36 +148,17 @@ class gui_menu(QMainWindow):
         self.change_visibility(self.generate_mesh_button, True)
 
     def fn_flip_face_normals(self):
-        # Flip mesh:
-        self.mesh = pv.wrap(self.mesh)
-        self.mesh.flip_normals()
-        self.mesh = self.mesh_conversion(self.mesh)
+        # Flip face normals
+        self.mesh = core.fn_flip_face_normals(self.mesh, True)
         if self.flip_face_normals:
             self.flip_face_normals = False
         else:
             self.flip_face_normals = True
 
-        # Calculate face centroids and normals:
-        mesh_pv = pv.wrap(self.mesh)
-        cent = mesh_pv.cell_centers().points
-        direction = mesh_pv.cell_normals
-
         # Update output message:
         self.message_output_label.setText('Next step:')
         self.message_output_label.setStyleSheet('color : black')
-        if self.tpms_type == 'Shell':
-            self.message_output.setText('Check if face normals are\npointing OUT of the mesh. If not,\nplease flip them. Then proceeed\nto generate mesh.')
-        else:
-            self.message_output.setText('Check if face normals are\npointing OUT to the mesh. If not,\nplease flip them. Then proceeed\nto generate mesh.')
-
-        # Plot TPMS face normals:
-        self.plotter = pv.Plotter(window_size = [1400, 1600])
-        _ = self.plotter.add_title('Close this window to continue', font_size = 10)
-        _ = self.plotter.add_mesh(self.mesh, color = True, show_edges = True)
-        _ = self.plotter.add_arrows(cent, direction, mag = 1)
-        _ = self.plotter.remove_scalar_bar()
-        _ = self.plotter.show_grid()
-        self.plotter.show()
+        self.message_output.setText('Check if face normals are\npointing OUT to the mesh. If not,\nplease flip them. Then proceeed\nto generate mesh.')
 
         # Deactivate check normals button:
         self.change_visibility(self.view_mesh_button, False)
@@ -217,76 +167,11 @@ class gui_menu(QMainWindow):
         self.change_visibility(self.export_stl_file_button, False)
 
     def fn_generate_mesh(self):
-        self.is_watertight = False
-        k = int(5 / 100 * self.unit_cell_mesh_resolution)
-        k_max = int(45 / 100 * self.unit_cell_mesh_resolution)
-        k_increment = int(5 / 100 * self.unit_cell_mesh_resolution)
-
-        # Mesh generation iterative process:
-        if self.tpms_type == 'Shell':
-            # Generate bounding box:
-            self.shell_bounding_box = trimesh.creation.box(extents = (self.sizes[0], self.sizes[1], self.sizes[2]), transform = None)
-            while not self.is_watertight and k <= k_max:
-                # Generation of the meshgrid:
-                X, Y, Z, tols, spacing  = self.generate_meshgrid(k)
-                
-                # Generate TPMS for intersection:
-                F = self.tpms_library(X, Y, Z)
-
-                # Mesh TPMS for intersection:
-                self.iterative_mesh, _ = self.mesh_shell(F, self.iterative_mesh, tols, spacing)
-
-                # Check face normals orientation:
-                if self.flip_face_normals:
-                    self.iterative_mesh = pv.wrap(self.iterative_mesh)
-                    self.iterative_mesh.flip_normals()
-                    self.iterative_mesh = self.mesh_conversion(self.iterative_mesh)
-                
-                # Calculate intercection:
-                self.iterative_mesh = trimesh.boolean.intersection((self.iterative_mesh, self.shell_bounding_box), engine = 'blender')
-                
-                # Check obtained results
-                k += k_increment
-                self.is_watertight = self.iterative_mesh.is_watertight
-                if not self.iterative_mesh.is_watertight:
-                    self.iterative_mesh.fill_holes()
-                    self.is_watertight = self.iterative_mesh.is_watertight
-        else:
-            # Generate bounding box:
-            bounding_box_1 = trimesh.creation.box(extents = (2 * self.sizes[0], 2 * self.sizes[1], 2 * self.sizes[2]), transform = None)
-            bounding_box_2 = trimesh.creation.box(extents = (self.sizes[0], self.sizes[1], self.sizes[2]), transform = None)
-            self.bounding_box = trimesh.boolean.difference((bounding_box_1, bounding_box_2), engine = 'blender')
-            
-            del bounding_box_1, bounding_box_2
-            
-            while not self.is_watertight and k <= k_max:
-                # Generation of the meshgrid:
-                X, Y, Z, tols, spacing  = self.generate_meshgrid(k)
-                
-                # Generate TPMS for intersection:
-                F = self.tpms_library(X, Y, Z)
-
-                # Mesh TPMS for intersection:
-                self.iterative_mesh, _ = self.mesh_skeletal(F, self.iterative_mesh, tols, spacing)
-
-                # Check face normals orientation:
-                if self.flip_face_normals:
-                    self.iterative_mesh = pv.wrap(self.iterative_mesh)
-                    self.iterative_mesh.flip_normals()
-                    self.iterative_mesh = self.mesh_conversion(self.iterative_mesh)
-                
-                # Calculate intercection:
-                self.iterative_mesh = trimesh.boolean.difference((self.iterative_mesh, self.bounding_box), engine = 'blender')
-                
-                # Check obtained results
-                k += k_increment
-                self.is_watertight = self.iterative_mesh.is_watertight
-                if not self.iterative_mesh.is_watertight:
-                    self.iterative_mesh.fill_holes()
-                    self.is_watertight = self.iterative_mesh.is_watertight
+        # Generate mesh:
+        self.iterative_mesh = core.fn_generate_mesh(self.tpms_type, self.tpms_design, self.c, self.thickness, self.sizes, self.cell_sizes, self.origin, self.unit_cell_mesh_resolution, self.mesh, self.flip_face_normals, True)
 
         # Update output message:
-        if self.is_watertight:
+        if self.iterative_mesh.is_watertight:
             self.message_output_label.setText('Mesh is generated:')
             self.message_output_label.setStyleSheet('color : green')
             self.message_output.setText('The obtained mesh is watertight.\nIf the opposite solution was\ndesired, try flipping face normals.')
@@ -420,27 +305,18 @@ class gui_menu(QMainWindow):
         self.are_warnings = None
         self.c = None
         self.cell_sizes = None
-        self.faces = None
         self.flip_face_normals = False
-        self.is_watertight = None
         self.iterative_mesh = None
         self.mesh = None
         self.origin = None
-        self.shell_bounding_box = None
         self.sizes = None
-        self.skeletal_bounding_box = None
-        self.spacing = None
         self.t = None
         self.thickness = None
-        self.tols = None
         self.tpms_library_items = None
         self.tpms_type = None
         self.tpms_design = None
         self.unit_cell_mesh_resolution = None
         self.vertices = None
-        self.X = None
-        self.Y = None
-        self.Z = None
 
     def load_default_values(self):
         # Initialize Skeletal-TPMS designs library:
@@ -478,7 +354,7 @@ class gui_menu(QMainWindow):
         self.skeletal_c_input.setText('0')
         self.skeletal_c_input.setEnabled(False)
 
-        self.shell_thickness_input.setText('1')
+        self.shell_thickness_input.setText('3')
 
         # Update output message:
         self.message_output_label.setText('Start:')
@@ -608,7 +484,854 @@ class gui_menu(QMainWindow):
         return F
 
 if __name__ == "__main__":
-    
+    # ui
+    ui = '''<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+<class>tpms_generator_gui</class>
+<widget class="QMainWindow" name="tpms_generator_gui">
+<property name="geometry">
+<rect>
+    <x>0</x>
+    <y>0</y>
+    <width>839</width>
+    <height>530</height>
+</rect>
+</property>
+<property name="sizePolicy">
+<sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+</sizepolicy>
+</property>
+<property name="windowTitle">
+<string>TPMSgen</string>
+</property>
+<widget class="QWidget" name="centralwidget">
+<property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+    </sizepolicy>
+</property>
+<widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+    <rect>
+    <x>10</x>
+    <y>10</y>
+    <width>821</width>
+    <height>481</height>
+    </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+    <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+        <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="6">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+            <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="font">
+            <font>
+            <bold>true</bold>
+            </font>
+            </property>
+            <property name="text">
+            <string>ACTIONS</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="Line" name="line_4">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QPushButton" name="plot_tpms_eq_button">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="text">
+            <string>Plot TPMS equation</string>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QPushButton" name="check_normals_button">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="text">
+            <string>Check face normals</string>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QPushButton" name="flip_normals_button">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="text">
+            <string>Flip face normals</string>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QPushButton" name="generate_mesh_button">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="text">
+            <string>Generate mesh</string>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QPushButton" name="view_mesh_button">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="text">
+            <string>View mesh</string>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QPushButton" name="export_stl_file_button">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="text">
+            <string>Export STL file</string>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <spacer name="verticalSpacer">
+            <property name="orientation">
+            <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+            <size>
+            <width>200</width>
+            <height>40</height>
+            </size>
+            </property>
+            </spacer>
+        </item>
+        <item>
+            <widget class="QLabel" name="message_output_label">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="font">
+            <font>
+            <bold>true</bold>
+            </font>
+            </property>
+            <property name="text">
+            <string/>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="Line" name="line_2">
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QLabel" name="message_output">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>200</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="text">
+            <string/>
+            </property>
+            </widget>
+        </item>
+        </layout>
+        </item>
+        <item row="0" column="1">
+        <widget class="Line" name="line_3">
+        <property name="orientation">
+            <enum>Qt::Vertical</enum>
+        </property>
+        </widget>
+        </item>
+        <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+            <widget class="QLabel" name="label_1">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="font">
+            <font>
+            <bold>true</bold>
+            </font>
+            </property>
+            <property name="text">
+            <string>TPMS TYPOLOGY SELECTOR</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="Line" name="line_7">
+            <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QLabel" name="label_4">
+            <property name="text">
+            <string>Designs library:</string>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <widget class="QListWidget" name="designs_library">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="minimumSize">
+            <size>
+            <width>270</width>
+            <height>0</height>
+            </size>
+            </property>
+            <property name="maximumSize">
+            <size>
+            <width>16777215</width>
+            <height>280</height>
+            </size>
+            </property>
+            </widget>
+        </item>
+        <item>
+            <layout class="QGridLayout" name="gridLayout_4">
+            <item row="1" column="2">
+            <widget class="QLabel" name="units_1">
+            <property name="text">
+                <string>mm</string>
+            </property>
+            </widget>
+            </item>
+            <item row="0" column="1">
+            <widget class="QLineEdit" name="skeletal_c_input">
+            <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="text">
+                <string/>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+            </item>
+            <item row="1" column="0">
+            <widget class="QLabel" name="label_11">
+            <property name="text">
+                <string>Thickness: </string>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+            </item>
+            <item row="0" column="0">
+            <widget class="QLabel" name="label_10">
+            <property name="text">
+                <string>C: </string>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+            </item>
+            <item row="1" column="1">
+            <widget class="QLineEdit" name="shell_thickness_input">
+            <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+            </item>
+            <item row="2" column="1">
+            <spacer name="verticalSpacer_2">
+            <property name="orientation">
+                <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+                <size>
+                <width>20</width>
+                <height>30</height>
+                </size>
+            </property>
+            </spacer>
+            </item>
+            </layout>
+        </item>
+        </layout>
+        </item>
+        <item row="0" column="5">
+        <widget class="Line" name="line">
+        <property name="orientation">
+            <enum>Qt::Vertical</enum>
+        </property>
+        </widget>
+        </item>
+        <item row="0" column="2">
+        <layout class="QGridLayout" name="gridLayout_3">
+        <item row="4" column="1">
+            <widget class="QLineEdit" name="bounding_box_x_dim_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="5" column="2">
+            <widget class="QLabel" name="units_3">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="9" column="0">
+            <widget class="QLabel" name="axis_5">
+            <property name="text">
+            <string>Y:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="4" column="2">
+            <widget class="QLabel" name="units_2">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="13" column="0">
+            <widget class="QLabel" name="axis_8">
+            <property name="text">
+            <string>Y:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="7" column="0" colspan="3">
+            <widget class="QLabel" name="label_7">
+            <property name="text">
+            <string>Unit cell dimensions:</string>
+            </property>
+            </widget>
+        </item>
+        <item row="8" column="0">
+            <widget class="QLabel" name="axis_4">
+            <property name="text">
+            <string>X:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="10" column="1">
+            <widget class="QLineEdit" name="unit_cell_z_dim_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="9" column="2">
+            <widget class="QLabel" name="units_6">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="4" column="0">
+            <widget class="QLabel" name="axis_1">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="text">
+            <string>X:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="11" column="0" colspan="3">
+            <widget class="QLabel" name="label_8">
+            <property name="text">
+            <string>Unit cell origin:</string>
+            </property>
+            </widget>
+        </item>
+        <item row="14" column="2">
+            <widget class="QLabel" name="units_10">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="2" column="0" colspan="3">
+            <widget class="QLabel" name="label_6">
+            <property name="text">
+            <string>Bounding box dimensions:</string>
+            </property>
+            </widget>
+        </item>
+        <item row="12" column="0">
+            <widget class="QLabel" name="axis_7">
+            <property name="text">
+            <string>X:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="10" column="2">
+            <widget class="QLabel" name="units_7">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="14" column="0">
+            <widget class="QLabel" name="axis_9">
+            <property name="text">
+            <string>Z:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="5" column="1">
+            <widget class="QLineEdit" name="bounding_box_y_dim_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="12" column="1">
+            <widget class="QLineEdit" name="unit_cell_origin_x_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="8" column="2">
+            <widget class="QLabel" name="units_5">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="8" column="1">
+            <widget class="QLineEdit" name="unit_cell_x_dim_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="6" column="2">
+            <widget class="QLabel" name="units_4">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="0" column="0" colspan="3">
+            <widget class="QLabel" name="label_2">
+            <property name="font">
+            <font>
+            <bold>true</bold>
+            </font>
+            </property>
+            <property name="text">
+            <string>DESIGN CONFIGURATOR</string>
+            </property>
+            </widget>
+        </item>
+        <item row="12" column="2">
+            <widget class="QLabel" name="units_8">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="14" column="1">
+            <widget class="QLineEdit" name="unit_cell_origin_z_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="6" column="0">
+            <widget class="QLabel" name="axis_3">
+            <property name="text">
+            <string>Z:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="13" column="2">
+            <widget class="QLabel" name="units_9">
+            <property name="text">
+            <string>mm</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="10" column="0">
+            <widget class="QLabel" name="axis_6">
+            <property name="text">
+            <string>Z:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
+            <widget class="Line" name="line_5">
+            <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+            </property>
+            </widget>
+        </item>
+        <item row="9" column="1">
+            <widget class="QLineEdit" name="unit_cell_y_dim_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="6" column="1">
+            <widget class="QLineEdit" name="bounding_box_z_dim_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="15" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+            <widget class="QLabel" name="label_9">
+            <property name="text">
+                <string>Unit cell mesh resolution:</string>
+            </property>
+            </widget>
+            </item>
+            <item>
+            <widget class="QLineEdit" name="mesh_resolution_input">
+            <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+            </item>
+            </layout>
+        </item>
+        <item row="5" column="0">
+            <widget class="QLabel" name="axis_2">
+            <property name="text">
+            <string>Y:</string>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        <item row="13" column="1">
+            <widget class="QLineEdit" name="unit_cell_origin_y_input">
+            <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+            </sizepolicy>
+            </property>
+            <property name="alignment">
+            <set>Qt::AlignCenter</set>
+            </property>
+            </widget>
+        </item>
+        </layout>
+        </item>
+        </layout>
+    </item>
+    </layout>
+    </item>
+    <item>
+    <widget class="Line" name="line_6">
+    <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+    </property>
+    </widget>
+    </item>
+    <item>
+    <widget class="QLabel" name="label_12">
+    <property name="font">
+        <font>
+        <pointsize>10</pointsize>
+        <italic>false</italic>
+        </font>
+    </property>
+    <property name="text">
+        <string>Developed by Albert Forés Garriga, Héctor Garcia de la Torre, Ricard Lado Roigé, Giovanni Gómez Gras and Marco A. Pérez Martínez</string>
+    </property>
+    </widget>
+    </item>
+    <item>
+    <widget class="QLabel" name="label_13">
+    <property name="font">
+        <font>
+        <pointsize>10</pointsize>
+        <italic>false</italic>
+        </font>
+    </property>
+    <property name="text">
+        <string>IQS School of Engineering, Universitat Ramon Llull (Barcelona, Spain)</string>
+    </property>
+    </widget>
+    </item>
+    </layout>
+</widget>
+</widget>
+<widget class="QStatusBar" name="statusbar"/>
+</widget>
+<resources/>
+<connections/>
+</ui>
+    '''
+
+    with open('TPMSgen_GUI.ui', 'w') as file:
+        file.write(ui)
+
     app = QApplication(sys.argv)
     GUI = gui_menu()
     GUI.move(800, int((QDesktopWidget().screenGeometry().height() - GUI.height()) / 2))
