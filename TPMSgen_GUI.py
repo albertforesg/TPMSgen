@@ -149,7 +149,10 @@ class gui_menu(QMainWindow):
     def fn_flip_face_normals(self):
         # Flip face normals
         self.mesh = core.fn_flip_face_normals(self.mesh, True)
-        self.flip_face_normals = True
+        if self.flip_face_normals:
+            self.flip_face_normals = False
+        else:
+            self.flip_face_normals = True
 
         # Update output message:
         self.message_output_label.setText('Next step:')
