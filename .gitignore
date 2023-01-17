@@ -3,6 +3,7 @@
 dist/
 build/
 Other\ Files/
+Releases/
 
 # Files
 .DS_Store
