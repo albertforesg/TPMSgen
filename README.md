@@ -167,7 +167,7 @@ A. Forés-Garriga, G. Gómez-Gras, and M. A. Pérez. Mechanical performance of a
 @article{fores_2023,
 	title = {Mechanical performance of additively manufactured three-dimensional lightweight cellular solids: experimental and numerical analysis.},
 	doi = {},
-	author = {A. For{\'{e}}s-Garriga, G. G{\'{o}}mez-Gras}, P{\'{e}}rez, Marco A.,
+	author = {A. For{\'{e}}s-Garriga, G. G{\'{o}}mez-Gras, P{\'{e}}rez, Marco A.},
 	journal = {Materials & Design},
 	year = {2023},
 	note = { (Under review) }
