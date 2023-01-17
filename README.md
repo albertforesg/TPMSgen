@@ -157,7 +157,7 @@ In all cases, the result can be plotted and exported into **.STL** file format b
 
 ![Mesh](https://user-images.githubusercontent.com/81706331/212511172-339de4fe-e169-4aa8-9791-4215f01efe70.png)
 
-## How can I cite this application?
+## Please, cite this pubication as such:
 
 To correctly cite the application it is necessary to refer to the Github repository and the paper.
 
