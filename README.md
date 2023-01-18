@@ -14,11 +14,11 @@ The current library of [**TPMSgen**](https://github.com/albertforesg/TPMSgen) fe
 
 | Shell-TPMS Unit Cell Designs             |  Skeletal-TPMS Unit Cell Designs |
 :-------------------------:|:-------------------------:
-![Gyroid](https://user-images.githubusercontent.com/81706331/212520075-61342071-74e8-4a0c-abcf-6d7c4e0b2b0f.png) Gyroid | ![Schoen Gyroid](https://user-images.githubusercontent.com/81706331/212520098-fa5b5f22-cd61-4911-96df-fa7c7154e5f3.png) Schoen Gyroid
-![Diamond](https://user-images.githubusercontent.com/81706331/212520079-ea284516-671c-4ec8-8540-510663d1fe84.png) Diamond | ![Schwarz Diamond](https://user-images.githubusercontent.com/81706331/212520101-3db607d9-cc28-4036-9d74-31e0583dd23d.png) Schwarz Diamond
-![Lidinoid](https://user-images.githubusercontent.com/81706331/212520087-77b587e0-c96f-4ed0-846e-e0ff68a5f94c.png) Lidinoid| ![Schwarz Primitive (pinched)](https://user-images.githubusercontent.com/81706331/212520106-87890470-5ee5-4857-b95c-2b7d2bcd28e5.png) Schwarz Primitive
-![Split-P](https://user-images.githubusercontent.com/81706331/212520090-54eccde5-42f4-4c08-9005-09529f2ea752.png) Split-P | ![Schwarz Primitive](https://user-images.githubusercontent.com/81706331/212520110-a109381d-d538-4e91-8528-9b3cc7bc4d04.png) Schwarz Primitive
-![Schwarz](https://user-images.githubusercontent.com/81706331/212520094-0863ce69-5f61-41ea-a1cc-f3939d13902a.png) Schwarz | ![Body Diagonals with Nodes](https://user-images.githubusercontent.com/81706331/212520113-e11ff779-645f-43e4-ad5d-1994a2a10e17.png) Body Diagonals with Nodes
+![Gyroid](https://user-images.githubusercontent.com/81706331/212520075-61342071-74e8-4a0c-abcf-6d7c4e0b2b0f.png) | ![Schoen Gyroid](https://user-images.githubusercontent.com/81706331/212520098-fa5b5f22-cd61-4911-96df-fa7c7154e5f3.png)
+![Diamond](https://user-images.githubusercontent.com/81706331/212520079-ea284516-671c-4ec8-8540-510663d1fe84.png) | ![Schwarz Diamond](https://user-images.githubusercontent.com/81706331/212520101-3db607d9-cc28-4036-9d74-31e0583dd23d.png)
+![Lidinoid](https://user-images.githubusercontent.com/81706331/212520087-77b587e0-c96f-4ed0-846e-e0ff68a5f94c.png) | ![Schwarz Primitive (pinched)](https://user-images.githubusercontent.com/81706331/212520106-87890470-5ee5-4857-b95c-2b7d2bcd28e5.png)
+![Split-P](https://user-images.githubusercontent.com/81706331/212520090-54eccde5-42f4-4c08-9005-09529f2ea752.png) | ![Schwarz Primitive](https://user-images.githubusercontent.com/81706331/212520110-a109381d-d538-4e91-8528-9b3cc7bc4d04.png)
+![Schwarz](https://user-images.githubusercontent.com/81706331/212520094-0863ce69-5f61-41ea-a1cc-f3939d13902a.png) | ![Body Diagonals with Nodes](https://user-images.githubusercontent.com/81706331/212520113-e11ff779-645f-43e4-ad5d-1994a2a10e17.png)
 
 ### Equations of Shell-TPMS designs:
 
@@ -191,33 +191,13 @@ A. Forés-Garriga, H. García de la Torre, R. Lado-Roigé, G. Gómez-Gras, and M
 
 ## Repository contributors
 
-<p align="center">
-<table border="0">
- <tr>
-    <td><p align="center">
-  <a href="url"><img src="https://avatars.githubusercontent.com/u/81706331?v=4" height="auto" width="100" style="border-radius:50%"></a>
-</p></td>
-	<td><td>
-    <td><p align="center">
-  <a href="url"><img src="https://avatars.githubusercontent.com/u/117845100?v=4" height="auto" width="100" style="border-radius:50%"></a>
-</p></td>
-	<td><td>
-	<td><p align="center">
-  <a href="url"><img src="https://avatars.githubusercontent.com/u/25719985?v=4" height="auto" width="100" style="border-radius:50%"></a>
-</p></td>
- </tr>
- <tr>
-    <td>Albert Forés Garriga</td>
-	<td><td>
-    <td>Héctor Garcia de la Torre</td>
-	<td><td>
-	<td>Ricard Lado Roigé</td>
- </tr>
-</table>
+- Albert Forés Garriga [^1]
 
-</p>
+- Héctor García de la Torre [^1]
 
----
+- Ricard Lado Roigé [^1]
+
+[^1]: Applied Mechanics and Advanced Manufactuing Research Group (GAM). IQS School of Engineering - Universitat Ramon llull (Barcelona, Spain)
 
 ## Acknowledgements
 
